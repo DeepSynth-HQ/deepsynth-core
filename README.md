@@ -9,7 +9,7 @@ DeepSynth is an AI-powered trading and financial agent built on the SUI blockcha
 
 ## 🚩 Overview
 
-DeepSynth is an AI-powered trading and financial agent built on the SUI blockchain. It combines advanced artificial intelligence with decentralized finance (DeFi) capabilities to enable automated trading, portfolio management, and financial analysis.
+DeepSynth is a cutting-edge DeFAI (Decentralized Financial AI) agent built on the SUI blockchain. By seamlessly integrating neural networks with decentralized finance (DeFi) protocols, it revolutionizes automated trading, portfolio optimization, and real-time market analysis. The platform leverages blockchain-native AI to deliver trustless, transparent, and efficient financial operations while maintaining complete decentralization.
 
 ## ✨ Features
 
