@@ -1,0 +1,2 @@
+ANALYZE_IMAGE_MESSAGE = "Analyze image"
+MARKET_CAP = 300000

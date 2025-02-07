@@ -1,0 +1,65 @@
+name: CICD
+run-name: CICD - ${{ github.event.head_commit.message }}
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+env:
+  IMAGE: sui/deepsynth
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      actions: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
+      - name: Set Image tag
+        id: vars
+        run: echo "tag=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{env.IMAGE}}:${{steps.vars.outputs.tag}}
+          push: true
+          file: Dockerfile
+
+      - name: Checkout to pluton-infra
+        uses: actions/checkout@v4
+        with:
+          repository: PlutonAi-HQ/pluton-infra
+          ref: main
+          token: ${{ secrets.PAT_ACCESS_TOKEN }}
+      - name: Edit deployment
+        run: |
+          sed -i "s|image: sui/deepsynth:.*|image: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE }}:${{ steps.vars.outputs.tag }}|" deployment/deepsynth.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add deployment/deepsynth.yaml
+
+          git commit -m "chore(deepsynth): Deploy deepsynth:${{ steps.vars.outputs.tag }} for [${{ github.event.head_commit.message }}]"
+          git pull --rebase
+          git push
