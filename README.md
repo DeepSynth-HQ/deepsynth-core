@@ -30,9 +30,10 @@ DeepSynth is an AI-powered trading and financial agent built on the SUI blockcha
 ### Use the Starter (Recommended)
 
 ```bash
-git clone https://github.com/DeepSynth-HQ/core.git
-cd core
+git clone https://github.com/DeepSynth-HQ/deepsynth-core.git
+cd deepsynth-core
 cp .env.example .env
+pip install -r requirements.txt
 ```
 
 #### Edit the .env file
