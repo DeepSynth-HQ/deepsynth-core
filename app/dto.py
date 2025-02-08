@@ -105,3 +105,6 @@ class UseRefCodeRequest(BaseModel):
 
 class LoginXRequest(BaseModel):
     token: str
+    ref_code: Optional[str] = Field(
+        None, description="The ref code", example="sjk2ioIi"
+    )

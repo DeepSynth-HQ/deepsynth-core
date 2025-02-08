@@ -176,7 +176,7 @@ class AuthController:
                 status_code=500, detail=f"Error during X callback: {str(e)}"
             )
 
-    def login_x(self, token: str):
+    def login_x(self, token: str, ref_code: str = None):
         """Handle direct X token login"""
         try:
             # TODO: implement X token login using the access token

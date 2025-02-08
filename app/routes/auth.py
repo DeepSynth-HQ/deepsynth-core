@@ -52,7 +52,7 @@ async def login_x(request: LoginXRequest, db: Session = Depends(get_db)):
     """Handle direct X token login"""
     auth_controller = AuthController(db)
     try:
-        result = auth_controller.login_x(request.token)
+        result = auth_controller.login_x(request.token, request.ref_code)
         return result
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
