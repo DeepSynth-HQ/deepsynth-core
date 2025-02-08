@@ -12,9 +12,9 @@ class Settings:
     REDIS_URI = os.getenv("REDIS_URI")
     RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", 60))
     RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", 5))
-    FILE_PREFIX = os.getenv("FILE_PREFIX", "pluton_")
+    FILE_PREFIX = os.getenv("FILE_PREFIX", "deepsynth_")
     SEARXNG_HOST = os.getenv("SEARXNG_HOST")
-    SERVICE_JUPITER_BASE_URL = os.getenv("SERVICE_JUPITER_BASE_URL")
+    SERVICE_ONCHAIN_BASE_URL = os.getenv("SERVICE_ONCHAIN_BASE_URL")
 
     @property
     def origins(self):
