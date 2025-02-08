@@ -101,3 +101,7 @@ class SocialCallbackRequest(BaseModel):
 
 class UseRefCodeRequest(BaseModel):
     ref_code: str
+
+
+class LoginXRequest(BaseModel):
+    token: str

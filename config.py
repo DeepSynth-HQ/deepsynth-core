@@ -9,20 +9,40 @@ class Settings:
     TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
     BASE_URL = os.getenv("BASE_URL")
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    REDIS_URI = os.getenv("REDIS_URI")
-    RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", 60))
-    RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", 5))
-    FILE_PREFIX = os.getenv("FILE_PREFIX", "deepsynth_")
-    SEARXNG_HOST = os.getenv("SEARXNG_HOST")
-    SERVICE_ONCHAIN_BASE_URL = os.getenv("SERVICE_ONCHAIN_BASE_URL")
 
+    ############################
+    #     Auth Settings       #
+    ############################
     @property
     def origins(self):
         return os.getenv("ALLOWED_ORIGINS", "*")
 
-    WALLET_API_URL = os.getenv("WALLET_API_URL")
-    JWT_SECRET = os.getenv("JWT_SECRET")
+    X_CLIENT_ID = os.getenv("X_CLIENT_ID")
+    X_CLIENT_SECRET = os.getenv("X_CLIENT_SECRET")
+    X_REDIRECT_URI = os.getenv("X_REDIRECT_URI")
+    FRONTEND_URL = os.getenv("FRONTEND_URL")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+    JWT_EXPIRATION = int(os.getenv("JWT_EXPIRATION", 86400))  # in seconds
+
+    ############################
+    #     Redis Settings      #
+    ############################
+    REDIS_URI = os.getenv("REDIS_URI")
+    RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", 60))
+    RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", 5))
+
+    ############################
+    #     File Settings       #
+    ############################
+    FILE_PREFIX = os.getenv("FILE_PREFIX", "deepsynth_")
+
+    ############################
+    #     Service Settings    #
+    ############################
+    SEARXNG_HOST = os.getenv("SEARXNG_HOST")
+    SERVICE_ONCHAIN_BASE_URL = os.getenv("SERVICE_ONCHAIN_BASE_URL")
+    WALLET_API_URL = os.getenv("WALLET_API_URL")
 
     #############################
     #     Prompt Engineering    #
