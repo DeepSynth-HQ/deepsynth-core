@@ -35,7 +35,7 @@ def create_jwt_token(payload: Dict) -> str:
     payload["exp"] = expiration
 
     return jwt.encode(
-        payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        payload, settings.JWT_SECRET_KEY_KEY, algorithm=settings.JWT_ALGORITHM
     )
 
 
@@ -44,7 +44,7 @@ def verify_jwt_token(token: str) -> Dict:
     try:
         print("TOKEN", token)
         return jwt.decode(
-            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+            token, settings.JWT_SECRET_KEY_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
     except jwt.InvalidTokenError:
         raise ValueError("Invalid token")

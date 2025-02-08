@@ -31,12 +31,12 @@ class AuthController:
         # TODO: Generate JWT token
         token = jwt.encode(
             {"sub": str(user.id), "exp": datetime.now() + timedelta(hours=1)},
-            settings.JWT_SECRET,
+            settings.JWT_SECRET_KEY,
             algorithm=settings.JWT_ALGORITHM,
         )
         refresh_token = jwt.encode(
             {"sub": str(user.id), "exp": datetime.now() + timedelta(days=7)},
-            settings.JWT_SECRET,
+            settings.JWT_SECRET_KEY,
             algorithm=settings.JWT_ALGORITHM,
         )
         # TODO: Return JWT token
@@ -110,7 +110,7 @@ class AuthController:
             # Generate JWT token
             token = jwt.encode(
                 {"sub": str(user.id), "exp": datetime.now() + timedelta(hours=1)},
-                settings.JWT_SECRET,
+                settings.JWT_SECRET_KEY,
                 algorithm=settings.JWT_ALGORITHM,
             )
             # Commit transaction

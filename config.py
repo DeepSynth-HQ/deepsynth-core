@@ -21,7 +21,7 @@ class Settings:
     X_CLIENT_SECRET = os.getenv("X_CLIENT_SECRET")
     X_REDIRECT_URI = os.getenv("X_REDIRECT_URI")
     FRONTEND_URL = os.getenv("FRONTEND_URL")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    JWT_SECRET_KEY_KEY = os.getenv("JWT_SECRET_KEY_KEY")
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRATION = int(os.getenv("JWT_EXPIRATION", 86400))  # in seconds
 
