@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
 env:
-  IMAGE: sui/deepsynth
+  IMAGE: deepsynth/deepsynth-core
 jobs:
   build:
     name: Build Docker Image
@@ -47,18 +47,18 @@ jobs:
       - name: Checkout to pluton-infra
         uses: actions/checkout@v4
         with:
-          repository: PlutonAi-HQ/pluton-infra
+          repository: DeepSynth-HQ/deepsynth-infra
           ref: main
           token: ${{ secrets.PAT_ACCESS_TOKEN }}
       - name: Edit deployment
         run: |
-          sed -i "s|image: sui/deepsynth:.*|image: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE }}:${{ steps.vars.outputs.tag }}|" deployment/deepsynth.yaml
+          sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE }}:${{ steps.vars.outputs.tag }}|" deployment/deepsynth-core.yaml
 
       - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add deployment/deepsynth.yaml
+          git add deployment/deepsynth-core.yaml
 
           git commit -m "chore(deepsynth): Deploy deepsynth:${{ steps.vars.outputs.tag }} for [${{ github.event.head_commit.message }}]"
           git pull --rebase
