@@ -5,7 +5,7 @@ DeepSynth is an AI-powered trading and financial agent built on the SUI blockcha
 
 </div align="center">
 
-![DeepSynth](https://img.shields.io/badge/DeepSynth-0.1.0-blue.svg) ![License](https://img.shields.io/badge/License-MIT-white.svg) ![Python](https://img.shields.io/badge/Python-2.7+-yellow.svg)![SUI](https://img.shields.io/badge/SUI-v1.41.1-blue.svg)
+![DeepSynth](https://img.shields.io/badge/DeepSynth-v0.1.8-blue.svg) ![License](https://img.shields.io/badge/License-MIT-white.svg) ![Python](https://img.shields.io/badge/Python-2.7+-yellow.svg)![SUI](https://img.shields.io/badge/SUI-v1.41.1-blue.svg)
 
 ## 🚩 Overview
 

@@ -14,6 +14,7 @@ from app.services.auth import auth_service
 from config import settings
 from app.utils.functions import verify_jwt_token, create_jwt_token
 from app.middleware.redis import get_redis_client
+from app.dto import UserRequestDTO
 
 
 class AuthController:
@@ -183,13 +184,36 @@ class AuthController:
             idinfo = verify_jwt_token(token)
 
             # TODO: get user info from the access token
-            user_id = idinfo["user_id"]
+            user_id = idinfo["sub"]
             username = idinfo.get("username")
             name = idinfo.get("name")
             address = idinfo.get("address", "")
+            # Create user
+            user_service = UserService(self.db)
+            user = user_service.get_user_by_email(username)
+            logger.debug(f"User Exists: {user}")
+            if not user:
+                user_data = UserRequestDTO(
+                    email=username,
+                    username=username,
+                )
+                user = user_service.create_user(user_data, ref_code, user_id)
+                logger.debug(f"User created: {user}")
+            # Create wallet
+            # wallet_service = WalletService(self.db)
+            # wallet = wallet_service.get_wallet_by_user_id(user.id)
+            # if not wallet:
+            #     wallet = wallet_service.create_wallet(user.id)
+            # Create referral
+            referral_service = ReferralService(self.db)
+            referral = referral_service.get_referral_by_user_id(user.id)
+            if not referral:
+                referral = referral_service.create_referral(user.id)
+            # Commit transaction
+            self.db.commit()
             # TODO: create JWT token for our system
             jwt_token = create_jwt_token(
-                {"user_id": user_id, "username": username, "name": name}
+                {"sub": user_id, "username": username, "name": name}
             )
 
             return {
@@ -197,8 +221,13 @@ class AuthController:
                 "user": {
                     "id": user_id,
                     "username": username,
-                    "address": address,
                     "name": name,
+                    "avatar": user.avatar,
+                    # "wallet": {"public_key": wallet.public_key},
+                    "referral": {
+                        "code": referral.referral_code,
+                        "total_used": referral.total_used,
+                    },
                 },
             }
         except Exception as e:

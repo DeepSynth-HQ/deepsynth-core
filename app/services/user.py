@@ -11,7 +11,9 @@ class UserService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_user(self, user: UserRequestDTO, ref_code: str = None) -> User:
+    def create_user(
+        self, user: UserRequestDTO, ref_code: str = None, id: str = None
+    ) -> User:
         try:
             # Find refferral by ref_code
             referral = (
@@ -20,7 +22,7 @@ class UserService:
                 .first()
             )
             # Generate user id
-            id = generate_uuid()
+            id = generate_uuid() if id is None else id
             # Append user id to referral
             if referral:
                 referral.referred_user_ids = referral.referred_user_ids + [id]
@@ -62,3 +64,6 @@ class UserService:
 
     def get_user_by_id(self, id: int) -> User:
         return self.db.query(User).filter(User.id == id).first()
+
+    def get_user_by_username(self, username: str) -> User:
+        return self.db.query(User).filter(User.username == username).first()

@@ -3,9 +3,12 @@ import hashlib
 import secrets
 import requests
 from typing import Dict, Optional
-from app.utils.functions import create_jwt_token
+from app.utils.functions import create_jwt_token, generate_uuid
 from config import settings
 from log import logger
+from app.services.user import UserService
+from sqlalchemy.orm import Session
+from app.database import get_db
 
 
 class AuthService:
@@ -30,7 +33,9 @@ class AuthService:
             "code_challenge": code_challenge,
         }
 
-    def handle_x_callback(self, code: str, code_verifier: str) -> Dict:
+    def handle_x_callback(
+        self, code: str, code_verifier: str, db: Session = get_db()
+    ) -> Dict:
         """Handle the OAuth2 callback from X"""
         try:
             # Exchange authorization code for tokens
@@ -82,23 +87,32 @@ class AuthService:
                 raise ValueError("Invalid user data received from X")
 
             user = user_data["data"]
+            # Get user from db
 
+            user_service = UserService(next(db))
+            user_db = user_service.get_user_by_username(user["username"])
+            if user_db:
+                id = user_db.id
+                logger.debug(f"User exists: {user_db}")
+            else:
+                id = generate_uuid()
+                logger.debug(f"User does not exist: {user_db}, generating new id: {id}")
             # TODO: save user to db
             logger.debug(f"User: {user}")
             # Create JWT token for our system
             jwt_token = create_jwt_token(
                 {
-                    "user_id": user["id"],
+                    "sub": id,
                     "username": user["username"],
                     "name": user["name"],
-                    "picture": user.get("profile_image_url"),
+                    "id": id,
                 }
             )
             logger.debug(f"JWT token: {jwt_token}")
             return {
                 "token": jwt_token,
                 "user": {
-                    "id": user["id"],
+                    "id": id,
                     "username": user["username"],
                     "name": user["name"],
                     "picture": user.get("profile_image_url"),

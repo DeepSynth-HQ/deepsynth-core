@@ -23,8 +23,8 @@ async def verify_token(
             token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
 
-        logger.info(f"Payload: {payload}")
-        user = db.query(User).filter(User.id == payload["user_id"]).first()
+        logger.debug(f"Payload: {payload}")
+        user = db.query(User).filter(User.id == payload["sub"]).first()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"

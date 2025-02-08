@@ -42,6 +42,8 @@ class BaseAgent:
     def __init__(self, user_id: str, session_id: str = None):
         self.user_id = user_id
         self.session_id = session_id
+        logger.debug(f"[AGENT] User ID: {self.user_id}")
+        logger.debug(f"[AGENT] Session ID: {self.session_id}")
 
     def get_history(self):
         logger.info(

@@ -65,7 +65,6 @@ class FileResponse(BaseModel):
 class UserRequestDTO(BaseModel):
     username: str = Field(..., description="The username", example="john_doe")
     email: str = Field(..., description="The email", example="john_doe@example.com")
-    password: str = Field(..., description="The password", example="password123")
 
 
 class UserResponseDTO(BaseModel):
