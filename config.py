@@ -58,8 +58,10 @@ class Settings:
     #############################
     ATOMA_BASE_URL = os.getenv("ATOMA_BASE_URL", "https://api.atoma.network/v1")
     ATOMA_API_KEY = os.getenv("ATOMA_API_KEY")
-    ATOMA_LLAMA_3_3_70B_INSTRUCT = "meta-llama/Llama-3.3-70B-Instruct"
-    ATOMA_DEEPSEEK_R1 = "deepseek-ai/DeepSeek-R1"
+    ATOMA_LLAMA_3_3_70B_INSTRUCT = os.getenv(
+        "ATOMA_LLAMA_3_3_70B_INSTRUCT", "meta-llama/Llama-3.3-70B-Instruct"
+    )
+    ATOMA_DEEPSEEK_R1 = os.getenv("ATOMA_DEEPSEEK_R1", "deepseek-ai/DeepSeek-R1")
 
     #############################
     #     AWS Settings          #

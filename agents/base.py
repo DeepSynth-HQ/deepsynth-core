@@ -15,16 +15,13 @@ from tools.onchain import OnchainTool
 from rich.panel import Panel
 from rich.markdown import Markdown
 
-from phi.model.openai import OpenAIChat
+from phi.model.openai.like import OpenAILike
 from uuid import uuid4
 from app.services.wallet import WalletService
 from app.database.client import get_db
 from sqlalchemy.orm import Session
 from prompt_engineering.deepsynth import DeepSynthPromptEngineering
 
-
-from agents.models.llama import LlamaChat
-from phi.model.deepseek import DeepSeekChat
 import time
 from itertools import cycle
 import sys
@@ -131,17 +128,11 @@ class BaseAgent:
         ]
         deepsynth_agent = Agent(
             name="DeepSynth",
-            model=OpenAIChat(id="gpt-4o-mini", temperature=0.3),
-            # model=LlamaChat(
-            #     id=settings.ATOMA_LLAMA_3_3_70B_INSTRUCT,
-            #     base_url=settings.ATOMA_BASE_URL,
-            #     api_key=settings.ATOMA_API_KEY,
-            # ),
-            # model=DeepSeekChat(
-            #     id=settings.ATOMA_DEEPSEEK_R1,
-            #     base_url=settings.ATOMA_BASE_URL,
-            #     api_key=settings.ATOMA_API_KEY,
-            # ),
+            model=OpenAILike(
+                id=settings.ATOMA_LLAMA_3_3_70B_INSTRUCT,
+                base_url=settings.ATOMA_BASE_URL,
+                api_key=settings.ATOMA_API_KEY,
+            ),
             description=DeepSynthPromptEngineering().get_description(),
             instructions=DeepSynthPromptEngineering().get_instructions(),
             tools=tools,
