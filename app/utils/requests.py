@@ -19,7 +19,7 @@ def retry_request(func, retries=3, delay=5):
         last_exception = None
         for i in range(retries):
             try:
-                logger.info(f"[RETRY] Attempt {i+1} of {retries}")
+                logger.debug(f"[RETRY] Attempt {i+1} of {retries}")
                 return func(*args, **kwargs)
             except Exception as e:
                 last_exception = e
