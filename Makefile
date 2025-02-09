@@ -1,5 +1,6 @@
 agent:
 	export PYTHONPATH=$$PYTHONPATH:. && \
+	export ENV=development && \
 	python agents/base.py
 
 prompt:

@@ -29,6 +29,7 @@ app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(IntegrityError, integrity_error_handler)
 
 
+@app.middleware("http")
 async def cors_handler(request: Request, call_next):
     if request.method == "OPTIONS":
         response = JSONResponse(
