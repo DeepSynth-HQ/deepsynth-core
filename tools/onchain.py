@@ -10,12 +10,43 @@ from app.utils.requests import retry_request
 
 
 class OnchainTool(Toolkit):
+    base_url = settings.SERVICE_ONCHAIN_BASE_URL
+
     def __init__(self):
         super().__init__(name="onchain_tools")
         self.register(self.check_balance)
+        self.register(self.check_balance_all_tokens)
         self.register(self.swap_token)
         self.register(self.limit_order)
         self.register(self.cancel_all_orders)
+
+    def check_balance_all_tokens(self, agent: Agent) -> str:
+        """
+        Use this tool to check the balance of a user in all tokens.
+        Returns:
+            str: Balance of the user in all tokens.
+        """
+        user_id = agent.context.get("user_id", None)
+        if user_id is None:
+            return "User does not exist"
+        with pool.connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM wallets WHERE user_id = %s", (user_id,))
+            wallets = cursor.fetchone()
+            if wallets is None:
+                return "User does not have a wallet"
+            # private_key = wallets[4]
+            public_key: str = wallets[3]
+
+            def get_balances(address: str) -> dict:
+                res = requests.get(
+                    f"{self.base_url}/allTokens",
+                    params={"address": address},
+                )
+                res.raise_for_status()
+                return res.json()
+
+            return retry_request(get_balances, retries=3, delay=5)(public_key)
 
     def check_balance(self, agent: Agent, token_address: str) -> str:
         """

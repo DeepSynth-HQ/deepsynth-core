@@ -68,7 +68,7 @@ class AuthService:
                 raise ValueError(f"Error getting tokens: {token_data['error']}")
 
             # Get user info using the access token
-            user_url = "https://api.twitter.com/2/users/me"
+            user_url = "https://api.x.com/2/users/me"
             user_headers = {
                 "Authorization": f"Bearer {token_data['access_token']}",
             }
