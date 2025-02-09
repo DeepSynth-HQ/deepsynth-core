@@ -12,7 +12,8 @@ from log import logger
 from rich.console import Console
 from rich.json import JSON
 from tools.onchain import OnchainTool
-
+from rich.panel import Panel
+from rich.markdown import Markdown
 
 from phi.model.openai import OpenAIChat
 from uuid import uuid4
@@ -23,6 +24,11 @@ from prompt_engineering.deepsynth import DeepSynthPromptEngineering
 
 
 from agents.models.llama import LlamaChat
+from phi.model.deepseek import DeepSeekChat
+import time
+from itertools import cycle
+import sys
+import threading
 
 db_url = settings.POSTGRES_URL
 storage = PgAgentStorage(
@@ -125,24 +131,29 @@ class BaseAgent:
         ]
         deepsynth_agent = Agent(
             name="DeepSynth",
-            tools=tools,
-            # model=OpenAIChat(id="gpt-4o-mini", temperature=0.3, max_tokens=16000),
-            model=LlamaChat(
-                id=settings.ATOMA_LLAMA_3_3_70B_INSTRUCT,
-                base_url=settings.ATOMA_BASE_URL,
-                api_key=settings.ATOMA_API_KEY,
-            ),
+            model=OpenAIChat(id="gpt-4o-mini", temperature=0.3),
+            # model=LlamaChat(
+            #     id=settings.ATOMA_LLAMA_3_3_70B_INSTRUCT,
+            #     base_url=settings.ATOMA_BASE_URL,
+            #     api_key=settings.ATOMA_API_KEY,
+            # ),
+            # model=DeepSeekChat(
+            #     id=settings.ATOMA_DEEPSEEK_R1,
+            #     base_url=settings.ATOMA_BASE_URL,
+            #     api_key=settings.ATOMA_API_KEY,
+            # ),
             description=DeepSynthPromptEngineering().get_description(),
             instructions=DeepSynthPromptEngineering().get_instructions(),
+            tools=tools,
             # show_tool_calls=True,
             markdown=True,
             storage=storage,
             read_chat_history=True,
             session_id=self.session_id,
-            num_history_responses=5,
+            num_history_responses=10,
             add_chat_history_to_messages=True,
             user_id=self.user_id,
-            debug_mode=True,
+            # debug_mode=True,
             add_datetime_to_instructions=True,
             read_tool_call_history=True,
             additional_context=f"You own the wallet with address: {WalletService(db).get_wallet_by_user_id(self.user_id).public_key if self.user_id else None}",
@@ -151,24 +162,54 @@ class BaseAgent:
                 "session_id": self.session_id,
             },
         )
-        # multi_agent_team.print_response(message=message + " " + "\n".join(images), stream=stream, markdown = True)
         return deepsynth_agent.run(
             message=message + " " + "\n".join(images), stream=stream
         )
 
 
+def show_thinking_animation(stop_event):
+    """Display an animated thinking indicator that runs until stopped"""
+    animation = cycle(["🐙 ", "🐙. ", "🐙.. ", "🐙... ", "🐙.... "])
+    while not stop_event.is_set():
+        sys.stdout.write("\r" + next(animation))
+        sys.stdout.flush()
+        time.sleep(0.2)
+    sys.stdout.write("\r")  # Clear the line
+    sys.stdout.flush()
+
+
 if __name__ == "__main__":
     # Chạy hàm call_agent với các tham số mẫu
-    user_id = "50c96bb8-359e-4adf-bec7-4532895b2bbb"
+    user_id = "e231365e-3f2d-4748-8621-2f3251427acf"
     session_id = str(uuid4())
     while True:
-        message = input("💥>  ")
+        message = input("🧑>  ")
         if message in ["q", "exit"]:
             break
-        response = BaseAgent(user_id=user_id, session_id=session_id).run(
-            message=message, stream=True
+
+        # Create an event to control the animation
+        stop_animation = threading.Event()
+
+        # Start the animation in a separate thread
+        animation_thread = threading.Thread(
+            target=show_thinking_animation, args=(stop_animation,)
         )
-        aggregated_response = ""
-        for chunk in response:
-            aggregated_response += chunk.content
-        print(f"🗯️>   {aggregated_response}")
+        animation_thread.start()
+
+        try:
+            response = BaseAgent(user_id=user_id, session_id=session_id).run(
+                message=message, stream=False
+            )
+        finally:
+            # Stop the animation
+            stop_animation.set()
+            animation_thread.join()
+
+        console.print(
+            Panel(
+                Markdown(response.content),
+                title="🐙",
+                style="green",
+                title_align="left",
+            )
+        )
