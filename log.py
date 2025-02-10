@@ -7,7 +7,7 @@ ENV = os.getenv("ENV", "production")
 
 # Set log level based on environment
 if ENV == "development":
-    LOG_LEVEL = logging.DEBUG
+    LOG_LEVEL = logging.INFO
 else:
     LOG_LEVEL = logging.INFO
 

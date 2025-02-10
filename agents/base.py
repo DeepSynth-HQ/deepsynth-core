@@ -144,7 +144,7 @@ class BaseAgent:
             num_history_responses=10,
             add_chat_history_to_messages=True,
             user_id=self.user_id,
-            # debug_mode=True,
+            debug_mode=True,
             add_datetime_to_instructions=True,
             read_tool_call_history=True,
             additional_context=f"You own the wallet with address: {WalletService(db).get_wallet_by_user_id(self.user_id).public_key if self.user_id else None}",

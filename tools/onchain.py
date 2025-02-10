@@ -42,21 +42,21 @@ class OnchainTool(Toolkit):
             str: Balance of the user in all tokens.
         """
         user_id = agent.context.get("user_id", None)
-        logger.debug(f"[TOOLS] Checking balance of all tokens for user: {user_id}")
+        logger.info(f"[TOOLS] Checking balance of all tokens for user: {user_id}")
         if user_id is None:
             return "User does not exist"
         wallet = self._extract_wallet(user_id)
         if wallet is None:
             return "User does not have a wallet"
         public_key: str = wallet["public_key"]
-        logger.debug(f"[TOOLS] Public key: {public_key}")
+        logger.info(f"[TOOLS] Public key: {public_key}")
 
         def get_balances(address: str) -> dict:
             res = requests.get(
                 f"{self.base_url}/allTokens",
                 params={"address": address},
             )
-            logger.debug(f"[TOOLS] Response: {res}")
+            logger.info(f"[TOOLS] Response: {res}")
             res.raise_for_status()
             return res.text
 
@@ -103,7 +103,22 @@ class OnchainTool(Toolkit):
                 params={"coinA": coinA, "coinB": coinB},
             )
             res.raise_for_status()
-            return res.text
+            data = res.json().get("data", None)
+            pool_id = data["poolAddress"]
+            if data is None:
+                raise Exception(
+                    f"[TOOLS] Failed to get pool info for {coinA} and {coinB}"
+                )
+            return json.dumps(
+                {
+                    "pool_id": pool_id,
+                    "coinA": coinA,
+                    "coinB": coinB,
+                    "coinAmountA": data["coinAmountA"],
+                    "coinAmountB": data["coinAmountB"],
+                    "liquidity": data["liquidity"],
+                }
+            )
 
         return retry_request(_fetch_pool_info, retries=3, delay=5)(coinA, coinB)
 
@@ -147,30 +162,66 @@ class OnchainTool(Toolkit):
 
     def swap_token(
         self,
-        agent: Agent,
-        pool_id: str,
+        agent: Agent,  # sell 0.5 SUI to USDC
+        pool_id: str,  # USDC/SUI a_to_b = True
+        coin_a: str,
+        coin_b: str,
         input_amount: float,
-        a_to_b: bool,
+        buy_or_sell: bool,
     ) -> str:
         """
         Use this tool to swap tokens. Always notify the user about the addresses of tokens. a_to_b is True if swap from A to B, False if swap from B to A. If swap from A to B it means sell A to B,
         Args:
             pool_id (str): ID of the pool. This can be obtained from get_pool_info_by_symbols
+            coin_a (str): Symbol of the input token.
+            coin_b (str): Symbol of the output token.
             input_amount (float): Amount of input token to swap. > 0
-            a_to_b (bool): True swap from A to B, False swap from B to A. Check the pool info to see which is which.
+            buy_or_sell (bool): True buy, False sell.
         Returns:
             str: Transaction hash or error message.
         """
         user_id = agent.context["user_id"]
-        logger.debug(f"[TOOLS] Swapping token for user: {user_id}")
+        logger.info(f"[TOOLS] Swapping token for user: {user_id}")
         wallet = self._extract_wallet(user_id)
         if wallet is None:
             logger.error(f"[TOOLS] User {user_id} does not have a wallet")
             return "User does not have a wallet"
+        pool_info = self.get_pool_info_by_id_to_swap(pool_id=pool_id)
+        pool_info = json.loads(pool_info).get("data", None)
+        if pool_info is None:
+            logger.error(f"[TOOLS] Failed to get pool info for {pool_id}")
+            return "Failed to get pool info"
+        coin_pool_a = pool_info["coinTypeA"]
+        coin_pool_b = pool_info["coinTypeB"]
+        # Nếu đúng chiều pool
+        if buy_or_sell:
+            # Pool USDC/SUI    SUI/USDC
+            # Input: USDC
+            # Output: SUI  # MUA SUI bang cach ban USDC
+            # a_to_b = True
+            # Buy
+            # Truong hop 1: Input: USDC, Output: SUI Mua SUI bang cach ban USDC
+            if coin_a in coin_pool_a:
+                a_to_b = True
+            # Truong hop 2: Input: SUI, Output: USDC Mua USDC bang cach ban SUI
+            else:
+                a_to_b = False
+        else:
+            # Pool USDC/SUI
+            # Input: SUI
+            # Output: USDC
+            # a_to_b = False
+            # Sell
+            # Truong hop 1: Input: SUI, Output: USDC Ban SUI de mua USDC
+            if coin_a not in coin_pool_a:
+                a_to_b = False
+            # Truong hop 2: Input: USDC, Output: SUI Ban USDC de mua SUI
+            else:
+                a_to_b = True
         private_key = wallet["private_key"]
         public_key = wallet["public_key"]
-        logger.debug(f"[TOOLS] Private key: {private_key}")
-        logger.debug(f"[TOOLS] Public key: {public_key}")
+        logger.info(f"[TOOLS] Private key: {private_key}")
+        logger.info(f"[TOOLS] Public key: {public_key}")
 
         def _swap_token(
             private_key: str,
