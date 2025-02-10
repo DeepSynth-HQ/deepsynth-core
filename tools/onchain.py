@@ -8,6 +8,7 @@ from phi.tools import Toolkit
 from phi.utils.log import logger
 from app.utils.requests import retry_request
 from log import logger
+import re
 
 
 class OnchainTool(Toolkit):
@@ -250,7 +251,12 @@ class OnchainTool(Toolkit):
                 return response.text
             if res["status"] is True:
                 logger.info(f"[TOOLS] Swapped token for user: {user_id}")
-                return res["data"]
+                data = res["data"]
+                # Example data: "Swap token successfully!, Digest: CKvB74AP78v6f2yNjSwwzyDmAt8bi9zFpJVHWbufcBn4"
+                # Regex to get the digest
+                digest = re.search(r"Digest: (\w+)", data).group(1)
+                transaction_hash = f"{settings.SUI_SCAN_BASE_URL}/tx/{digest}"
+                return transaction_hash
             else:
                 raise Exception(
                     f"[TOOLS] Failed to swap token for user: {user_id}, error: {res}"
