@@ -45,8 +45,8 @@ class BaseAgent:
     def __init__(self, user_id: str, session_id: str = None):
         self.user_id = user_id
         self.session_id = session_id
-        logger.debug(f"[AGENT] User ID: {self.user_id}")
-        logger.debug(f"[AGENT] Session ID: {self.session_id}")
+        logger.info(f"[AGENT] User ID: {self.user_id}")
+        logger.info(f"[AGENT] Session ID: {self.session_id}")
 
     def get_history(self):
         logger.info(
@@ -57,7 +57,9 @@ class BaseAgent:
         if self.session_id:
             session = next((s for s in sessions if s.session_id == session_id), None)
             if session is None:
-                logger.info(f"No session found for {session_id} and user {user_id}")
+                logger.info(
+                    f"No session found for {self.session_id} and user {self.user_id}"
+                )
                 return history
             for run in session.memory.get("runs"):
                 user_message = run.get("message").get("content")
@@ -144,7 +146,7 @@ class BaseAgent:
             num_history_responses=10,
             add_chat_history_to_messages=True,
             user_id=self.user_id,
-            debug_mode=True,
+            info_mode=True,
             add_datetime_to_instructions=True,
             read_tool_call_history=True,
             additional_context=f"You own the wallet with address: {WalletService(db).get_wallet_by_user_id(self.user_id).public_key if self.user_id else None}",
