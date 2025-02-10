@@ -170,6 +170,7 @@ class AuthController:
             result = auth_service.handle_x_callback(code, code_verifier)
             # Redirect to frontend with token
             frontend_url = f"{settings.FRONTEND_URL}/login?token={result['token']}"
+            logger.debug(f"Frontend URL: {frontend_url}")
             return frontend_url
         except Exception as e:
             logger.error(f"Error during X callback: {str(e)}")
