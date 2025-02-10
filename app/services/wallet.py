@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 class WalletService:
     def __init__(self, db: Session):
         self.db = db
-        self.base_url = settings.WALLET_API_URL
+        self.base_url = settings.SERVICE_ONCHAIN_BASE_URL
         self.headers = {"Content-Type": "application/json"}
 
     def generate_wallet(self):

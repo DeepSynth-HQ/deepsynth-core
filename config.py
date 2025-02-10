@@ -42,7 +42,6 @@ class Settings:
     ############################
     SEARXNG_HOST = os.getenv("SEARXNG_HOST")
     SERVICE_ONCHAIN_BASE_URL = os.getenv("SERVICE_ONCHAIN_BASE_URL")
-    WALLET_API_URL = os.getenv("WALLET_API_URL")
 
     #############################
     #     Prompt Engineering    #
