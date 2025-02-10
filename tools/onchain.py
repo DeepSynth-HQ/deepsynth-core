@@ -22,6 +22,8 @@ class OnchainTool(Toolkit):
         self.register(self.get_pool_info_by_id_to_swap)
         self.register(self.get_token_address_by_symbol)
         self.register(self.swap_token)
+        self.register(self.transfer_token)
+        self.register(self.get_apr_by_token)
 
     def _extract_wallet(self, user_id: str) -> dict | None:
         with pool.connection() as connection:
@@ -268,3 +270,91 @@ class OnchainTool(Toolkit):
             input_amount,
             a_to_b,
         )
+
+    def transfer_token(
+        self,
+        agent: Agent,
+        receiver_address: str,
+        amount: float,
+        token_address: str,
+    ) -> str:
+        """
+        Use this tool to transfer tokens to a receiver.
+        Args:
+            receiver_address (str): Address of the receiver.
+            amount (float): Amount of tokens to transfer.
+            token_address (str): Address of the token. Default is SUI with address "0x2::sui::SUI"
+        Returns:
+            str: Transaction hash or error message.
+        """
+        user_id = agent.context["user_id"]
+        wallet = self._extract_wallet(user_id)
+        if wallet is None:
+            logger.error(f"[TOOLS] User {user_id} does not have a wallet")
+            return "User does not have a wallet"
+        private_key = wallet["private_key"]
+        public_key = wallet["public_key"]
+        logger.info(f"[TOOLS] Private key: {private_key}")
+        logger.info(f"[TOOLS] Public key: {public_key}")
+
+        def _transfer_token(
+            private_key: str,
+            receiver_address: str,
+            amount: float,
+            token_address: str,
+        ) -> str:
+            body = {
+                "to": receiver_address,
+                "amount": amount,
+                "token": token_address,
+                "privateKey": private_key,
+            }
+            logger.info(f"Body: {body}")
+            response = requests.post(f"{self.base_url}/transfer", json=body)
+            logger.info(f"Response: {response}")
+            data = response.json()
+            if data["status"] is True:
+                logger.info(f"[TOOLS] Transferred token for user: {user_id}")
+                digest = data["data"]["digest"]
+                transaction_hash = f"{settings.SUI_SCAN_BASE_URL}/tx/{digest}"
+                return transaction_hash
+            else:
+                logger.error(response.text)
+                raise Exception(f"[TOOLS] Failed to transfer token for user: {user_id}")
+
+        return retry_request(_transfer_token, retries=3, delay=5)(
+            private_key,
+            receiver_address,
+            amount,
+            token_address,
+        )
+
+    def get_apr_by_token(self, token_address: str) -> str:
+        """
+        Use this tool to get the APR of a token.
+        Args:
+            token_address (str): Address of the token. Default is SUI with address "0x2::sui::SUI"
+        Returns:
+            str: APR of the token.
+        """
+
+        def _fetch_apr(token_address: str) -> str:
+            res = requests.get(
+                f"{self.base_url}/getAPRByToken",
+                params={"token": token_address},
+            )
+            res.raise_for_status()
+            return res.text
+
+        return retry_request(_fetch_apr, retries=3, delay=5)(token_address)
+
+    def create_pool(self, coin_a: str, coin_b: str) -> str:
+        """
+        Use this tool to create a pool.
+        Args:
+            coin_a (str): Symbol of the first token.
+            coin_b (str): Symbol of the second token.
+        Returns:
+            str: Pool info of the token.
+        """
+        pass
