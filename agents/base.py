@@ -55,7 +55,9 @@ class BaseAgent:
         sessions = storage.get_all_sessions(user_id=self.user_id)
         history = []
         if self.session_id:
-            session = next((s for s in sessions if s.session_id == session_id), None)
+            session = next(
+                (s for s in sessions if s.session_id == self.session_id), None
+            )
             if session is None:
                 logger.info(
                     f"No session found for {self.session_id} and user {self.user_id}"

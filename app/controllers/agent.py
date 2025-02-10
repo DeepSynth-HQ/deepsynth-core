@@ -1,4 +1,5 @@
 from app.services.agent import AgentService
+from log import logger
 
 
 class AgentController:
@@ -11,4 +12,11 @@ class AgentController:
         return self.agent_service.call_agent(message, images)
 
     def get_agent_history(self):
-        return self.agent_service.get_history()
+        try:
+            return self.agent_service.get_history()
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            logger.error(f"[AGENT] Failed to get history: {e}")
+            return []
