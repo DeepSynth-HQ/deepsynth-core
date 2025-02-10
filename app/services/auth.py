@@ -88,6 +88,7 @@ class AuthService:
 
             user = user_data["data"]
             # Get user from db
+            logger.debug(f"User: {user}")
 
             user_service = UserService(next(db))
             user_db = user_service.get_user_by_username(user["username"])
