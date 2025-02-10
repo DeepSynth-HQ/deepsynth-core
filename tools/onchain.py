@@ -24,6 +24,7 @@ class OnchainTool(Toolkit):
         self.register(self.swap_token)
         self.register(self.transfer_token)
         self.register(self.get_apr_by_token)
+        self.register(self.add_liquidity_to_pool)
 
     def _extract_wallet(self, user_id: str) -> dict | None:
         with pool.connection() as connection:
@@ -223,7 +224,6 @@ class OnchainTool(Toolkit):
                 a_to_b = True
         private_key = wallet["private_key"]
         public_key = wallet["public_key"]
-        logger.info(f"[TOOLS] Private key: {private_key}")
         logger.info(f"[TOOLS] Public key: {public_key}")
 
         def _swap_token(
@@ -294,7 +294,6 @@ class OnchainTool(Toolkit):
             return "User does not have a wallet"
         private_key = wallet["private_key"]
         public_key = wallet["public_key"]
-        logger.info(f"[TOOLS] Private key: {private_key}")
         logger.info(f"[TOOLS] Public key: {public_key}")
 
         def _transfer_token(
@@ -358,3 +357,44 @@ class OnchainTool(Toolkit):
             str: Pool info of the token.
         """
         pass
+
+    def add_liquidity_to_pool(self, agent: Agent, pool_id: str, amount: float) -> str:
+        """
+        Use this tool to add liquidity to a pool.
+        Args:
+            pool_id (str): ID of the pool.
+            amount (float): Amount of tokens to add.
+        Returns:
+            str: Transaction hash or error message.
+        """
+        user_id = agent.context["user_id"]
+        wallet = self._extract_wallet(user_id)
+        if wallet is None:
+            logger.error(f"[TOOLS] User {user_id} does not have a wallet")
+            return "User does not have a wallet"
+        private_key = wallet["private_key"]
+        public_key = wallet["public_key"]
+        logger.info(f"[TOOLS] Public key: {public_key}")
+
+        def _add_liquidity(private_key: str, pool_id: str, amount: float) -> str:
+            body = {
+                "poolId": pool_id,
+                "totalAmount": amount,
+                "privateKey": private_key,
+            }
+            response = requests.post(f"{self.base_url}/addLiquidity", json=body)
+            logger.info(f"Response: {response}")
+            data = response.json()
+            if data["status"] is True:
+                logger.info(f"[TOOLS] Added liquidity for user: {user_id}")
+                digest = data["data"]["digest"]
+                transaction_hash = f"{settings.SUI_SCAN_BASE_URL}/tx/{digest}"
+                return transaction_hash
+            else:
+                raise Exception(f"[TOOLS] Failed to add liquidity for user: {user_id}")
+
+        return retry_request(_add_liquidity, retries=3, delay=5)(
+            private_key,
+            pool_id,
+            amount,
+        )
