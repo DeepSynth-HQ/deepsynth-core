@@ -211,6 +211,12 @@ class AuthController:
             if not referral:
                 referral = referral_service.create_referral(user.id)
             # Commit transaction
+
+            # Get wallet
+            wallet_service = WalletService(self.db)
+            wallet = wallet_service.get_wallet_by_user_id(user.id)
+            if not wallet:
+                wallet = wallet_service.create_wallet(user.id)
             self.db.commit()
             # TODO: create JWT token for our system
             jwt_token = create_jwt_token(
@@ -224,7 +230,7 @@ class AuthController:
                     "username": username,
                     "name": name,
                     "avatar": user.avatar,
-                    # "wallet": {"public_key": wallet.public_key},
+                    "wallet": {"public_key": wallet.public_key},
                     "referral": {
                         "code": referral.referral_code,
                         "total_used": referral.total_used,

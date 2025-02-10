@@ -97,7 +97,6 @@ class AuthService:
             else:
                 id = generate_uuid()
                 logger.debug(f"User does not exist: {user_db}, generating new id: {id}")
-            # TODO: save user to db
             logger.debug(f"User: {user}")
             # Create JWT token for our system
             jwt_token = create_jwt_token(

@@ -15,15 +15,12 @@ class WalletService:
         """
         Generate a new wallet in Solana
         """
-        response = requests.post(
-            f"{self.base_url}/api/wallet/generate", headers=self.headers
-        )
+        response = requests.post(f"{self.base_url}/createAccount", headers=self.headers)
         data = response.json()
         data = data["data"]
         data = {
-            "seed_phrase": data["seedPhrase"],
-            "private_key": data["privateKeyBase58"],
-            "public_key": data["publicKey"],
+            "private_key": data["privateKey"],
+            "public_key": data["address"],
         }
         return data
 
