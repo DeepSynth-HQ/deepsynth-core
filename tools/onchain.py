@@ -390,7 +390,7 @@ class OnchainTool(Toolkit):
                 "privateKey": private_key,
             }
             response = requests.post(f"{self.base_url}/addLiquidity", json=body)
-            logger.info(f"Response: {response}")
+            logger.info(f"Response: {response.text}")
             data = response.json()
             if data["status"] is True:
                 logger.info(f"[TOOLS] Added liquidity for user: {user_id}")
@@ -398,7 +398,7 @@ class OnchainTool(Toolkit):
                 transaction_hash = f"{settings.SUI_SCAN_BASE_URL}/tx/{digest}"
                 return transaction_hash
             else:
-                raise Exception(f"[TOOLS] Failed to add liquidity for user: {user_id}")
+                raise Exception(f"{data}")
 
         return retry_request(_add_liquidity, retries=3, delay=5)(
             private_key,
