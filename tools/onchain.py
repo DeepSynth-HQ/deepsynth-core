@@ -108,11 +108,12 @@ class OnchainTool(Toolkit):
             )
             res.raise_for_status()
             data = res.json().get("data", None)
-            pool_id = data["poolAddress"]
+
             if data is None:
                 raise Exception(
                     f"[TOOLS] Failed to get pool info for {coinA} and {coinB}"
                 )
+            pool_id = data["poolAddress"]
             return json.dumps(
                 {
                     "pool_id": pool_id,
