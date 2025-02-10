@@ -113,6 +113,8 @@ class OnchainTool(Toolkit):
                 raise Exception(
                     f"[TOOLS] Failed to get pool info for {coinA} and {coinB}"
                 )
+            if isinstance(data, str):
+                raise Exception(f"{data}")
             pool_id = data.get("poolAddress", None)
             if pool_id is None:
                 raise Exception(
