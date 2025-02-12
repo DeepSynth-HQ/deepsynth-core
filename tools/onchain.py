@@ -389,6 +389,7 @@ class OnchainTool(Toolkit):
                 "totalAmount": amount,
                 "privateKey": private_key,
             }
+            logger.info(f"Body: {body}")
             response = requests.post(f"{self.base_url}/addLiquidity", json=body)
             logger.info(f"Response: {response.text}")
             data = response.json()

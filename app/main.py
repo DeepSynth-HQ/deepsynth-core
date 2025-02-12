@@ -13,7 +13,7 @@ from app.routes.file import router as file_router
 from app.routes.user import router as user_router
 from app.routes.wallet import router as wallet_router
 from app.routes.referral import router as referral_router
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response, JSONResponse
 from app.core.error_handlers import app_exception_handler, integrity_error_handler
 from app.core.exceptions import AppException
 from sqlalchemy.exc import IntegrityError
@@ -32,8 +32,7 @@ app.add_exception_handler(IntegrityError, integrity_error_handler)
 @app.middleware("http")
 async def cors_handler(request: Request, call_next):
     if request.method == "OPTIONS":
-        response = JSONResponse(
-            content={},
+        response = Response(
             status_code=204,
             headers={
                 "Access-Control-Allow-Credentials": "true",
